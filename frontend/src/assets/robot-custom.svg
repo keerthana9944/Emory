@@ -1,0 +1,45 @@
+<svg width="340" height="420" viewBox="0 0 340 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="body" x1="38" y1="96" x2="302" y2="352" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAF4FF"/>
+      <stop offset="1" stop-color="#CFE3F9"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="96" y1="76" x2="244" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1C4F"/>
+      <stop offset="1" stop-color="#0E327F"/>
+    </linearGradient>
+    <linearGradient id="chest" x1="132" y1="214" x2="208" y2="296" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6ED8FF"/>
+      <stop offset="1" stop-color="#45A8E8"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(14)">
+      <stop stop-color="#7BEEFF"/>
+      <stop offset="0.45" stop-color="#1FC8FF"/>
+      <stop offset="1" stop-color="#0B1B42"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="170" cy="384" rx="92" ry="18" fill="#041340" fill-opacity="0.35"/>
+
+  <rect x="74" y="118" width="192" height="224" rx="56" fill="url(#body)"/>
+
+  <rect x="96" y="44" width="148" height="74" rx="28" fill="url(#body)"/>
+  <rect x="96" y="58" width="148" height="56" rx="24" fill="url(#screen)"/>
+
+  <path d="M98 82H86C78.268 82 72 88.268 72 96V108" stroke="#CBE3FF" stroke-width="7" stroke-linecap="round"/>
+  <path d="M242 82H254C261.732 82 268 88.268 268 96V108" stroke="#CBE3FF" stroke-width="7" stroke-linecap="round"/>
+
+  <circle cx="136" cy="86" r="15" fill="url(#eye)"/>
+  <circle cx="204" cy="86" r="15" fill="url(#eye)"/>
+  <circle cx="136" cy="86" r="4" fill="#8FF5FF"/>
+  <circle cx="204" cy="86" r="4" fill="#8FF5FF"/>
+
+  <rect x="126" y="206" width="88" height="96" rx="18" fill="url(#chest)"/>
+  <circle cx="170" cy="267" r="12" stroke="#84DDFE" stroke-width="4" fill="#3CB2EC"/>
+
+  <rect x="48" y="202" width="36" height="88" rx="18" fill="url(#body)"/>
+  <rect x="256" y="202" width="36" height="88" rx="18" fill="url(#body)"/>
+
+  <path d="M74 160C52 172 48 190 48 206" stroke="#D9EAFF" stroke-width="10" stroke-linecap="round"/>
+  <path d="M266 160C288 172 292 190 292 206" stroke="#D9EAFF" stroke-width="10" stroke-linecap="round"/>
+</svg>
