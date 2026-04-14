@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { getSession, logoutUser } from "../lib/auth";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/chat";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://emory-1nu0.onrender.com/api/chat";
 const CODE_FENCE_REGEX = /```([\w-]*)\n([\s\S]*?)```/g;
 const RECENT_CUTOFF_MS = 24 * 60 * 60 * 1000;
 
