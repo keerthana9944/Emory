@@ -113,3 +113,17 @@ exports.getAllConversations = async (req, res) => {
     const conversations = await Conversation.find({}).sort({ updatedAt: -1}).lean();
     res.json(conversations);
 };
+
+exports.deleteConversation = async (req, res) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        throw createHttpError(400, "Invalid conversation id.");
+    }
+
+    const deletedConversation = await Conversation.findByIdAndDelete(req.params.id);
+
+    if (!deletedConversation) {
+        throw createHttpError(404, "Conversation not found.");
+    }
+
+    res.json({ message: "Conversation deleted successfully." });
+};

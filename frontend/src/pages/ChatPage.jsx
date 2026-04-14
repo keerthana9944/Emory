@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LoaderCircle,
+  Trash2,
   LogOut,
   MessageSquare,
   History,
@@ -297,6 +298,28 @@ function ChatPage() {
     }
   };
 
+  const deleteConversation = async (id) => {
+    if (!id || isLoading || isFetchingConversation) return;
+
+    const shouldDelete = window.confirm("Delete this conversation? This cannot be undone.");
+    if (!shouldDelete) return;
+
+    setErrorText("");
+
+    try {
+      await axios.delete(`${API_BASE_URL}/${id}`);
+
+      if (conversationId === id) {
+        setConversationId(null);
+        setMessages([]);
+      }
+
+      await refreshConversations();
+    } catch {
+      setErrorText("Could not delete this conversation. Please try again.");
+    }
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -517,18 +540,39 @@ function ChatPage() {
               const isSelected = conversation._id === conversationId;
 
               return (
-                <button
+                <div
                   key={conversation._id}
                   className={`historyItem ${isSelected ? "selected" : ""}`}
                   onClick={() => openConversation(conversation._id)}
-                  disabled={isLoading || isFetchingConversation}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      openConversation(conversation._id);
+                    }
+                  }}
                 >
                   <div className="historyItemTop">
-                    <MessageSquare size={16} />
-                    <span>{formatTime(conversation.updatedAt || conversation.createdAt)}</span>
+                    <div className="historyItemMeta">
+                      <MessageSquare size={16} />
+                      <span>{formatTime(conversation.updatedAt || conversation.createdAt)}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="historyDeleteButton"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteConversation(conversation._id);
+                      }}
+                      aria-label="Delete conversation"
+                      disabled={isLoading || isFetchingConversation}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                   <p>{lastMessagePreview(conversation)}</p>
-                </button>
+                </div>
               );
             })}
           </div>

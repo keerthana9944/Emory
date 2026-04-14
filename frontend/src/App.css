@@ -669,19 +669,20 @@
 
 .historyList {
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-right: 6px;
+  padding-right: 12px;
   scrollbar-gutter: stable;
-  scrollbar-width: thin;
+  scrollbar-width: auto;
   scrollbar-color: rgba(255, 197, 116, 0.95) rgba(255, 255, 255, 0.08);
 }
 
 .historyList::-webkit-scrollbar {
-  width: 10px;
+  width: 14px;
 }
 
 .historyList::-webkit-scrollbar-track {
@@ -712,6 +713,11 @@
   cursor: pointer;
 }
 
+.historyItem:focus-visible {
+  outline: 2px solid rgba(255, 193, 119, 0.95);
+  outline-offset: 2px;
+}
+
 .historyItem:hover {
   background: rgba(255, 255, 255, 0.14);
 }
@@ -730,9 +736,41 @@
 .historyItemTop {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 12px;
   color: #daf5fb;
+}
+
+.historyItemMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.historyDeleteButton {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffd6a1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.historyDeleteButton:hover {
+  background: rgba(255, 113, 91, 0.18);
+  color: #ffe9dd;
+}
+
+.historyDeleteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .historyItem p {
@@ -1420,6 +1458,12 @@
     display: flex;
   }
 
+  .layout.sidebar-compact .historyList {
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
   .layout.sidebar-compact .sidebarChip {
     margin-bottom: 10px;
   }
@@ -1479,6 +1523,8 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    overflow-y: auto;
+    max-height: calc(100svh - 340px);
   }
 
   .topBar {
@@ -1528,6 +1574,8 @@
 
   .historyList {
     grid-template-columns: 1fr;
+    overflow-y: auto;
+    max-height: calc(100svh - 310px);
   }
 
   .landingPanel h3 {
@@ -1565,10 +1613,6 @@
 
   .messageCodeCopyButton {
     align-self: flex-end;
-  }
-
-  .historyList {
-    max-height: 240px;
   }
 
   .sidebar {
