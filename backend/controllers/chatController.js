@@ -9,8 +9,95 @@ const createHttpError = (statusCode, message) => {
 };
 
 const ollama = new Ollama({
-    host: "http://127.0.0.1:11434"
+    host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434"
 });
+
+const getModelName = () => process.env.MODEL || process.env.AI_MODEL;
+
+const normalizeMessages = (messages) => messages.map((message) => ({
+    role: message.role,
+    content: message.content
+}));
+
+const getReplyFromHostedApi = async (messages) => {
+    const apiKey = process.env.AI_API_KEY;
+    const apiUrl = process.env.AI_API_URL || "https://openrouter.ai/api/v1/chat/completions";
+    const model = getModelName();
+
+    if (!apiKey) {
+        throw createHttpError(500, "AI_API_KEY is missing for hosted model requests.");
+    }
+
+    if (!model) {
+        throw createHttpError(500, "MODEL (or AI_MODEL) environment variable is missing.");
+    }
+
+    let response;
+
+    try {
+        response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model,
+                messages: normalizeMessages(messages)
+            })
+        });
+    } catch {
+        throw createHttpError(502, "Failed to connect to hosted model provider.");
+    }
+
+    let data;
+
+    try {
+        data = await response.json();
+    } catch {
+        throw createHttpError(502, "Hosted model provider returned a non-JSON response.");
+    }
+
+    if (!response.ok) {
+        const providerMessage = data?.error?.message || data?.message || "Hosted model request failed.";
+        throw createHttpError(response.status, providerMessage);
+    }
+
+    const reply = data?.choices?.[0]?.message?.content;
+
+    if (typeof reply !== "string" || !reply.trim()) {
+        throw createHttpError(502, "Hosted model provider returned an invalid response.");
+    }
+
+    return reply;
+};
+
+const getReplyFromOllama = async (messages) => {
+    const model = getModelName();
+
+    if (!model) {
+        throw createHttpError(500, "MODEL (or AI_MODEL) environment variable is missing.");
+    }
+
+    let response;
+
+    try {
+        response = await ollama.chat({
+            model,
+            messages: normalizeMessages(messages)
+        });
+    } catch {
+        throw createHttpError(502, "Failed to connect to Ollama. Set AI_API_KEY for cloud deployments, or ensure Ollama is running.");
+    }
+
+    const reply = response?.message?.content;
+
+    if (typeof reply !== "string" || !reply.trim()) {
+        throw createHttpError(502, "The model returned an invalid response.");
+    }
+
+    return reply;
+};
 
 exports.sendMessage = async (req, res) => {
     const { message, conversationId } = req.body;
@@ -19,8 +106,8 @@ exports.sendMessage = async (req, res) => {
         throw createHttpError(400, "A non-empty message is required.");
     }
 
-    if (!process.env.MODEL) {
-        throw createHttpError(500, "MODEL environment variable is missing.");
+    if (!getModelName()) {
+        throw createHttpError(500, "MODEL (or AI_MODEL) environment variable is missing.");
     }
 
     let conversation;
@@ -46,19 +133,9 @@ exports.sendMessage = async (req, res) => {
         content: message.trim()
     });
 
-    const response = await ollama.chat({
-        model: process.env.MODEL,
-        messages: conversation.messages.map(m => ({
-            role: m.role,
-            content: m.content
-        }))
-    });
-
-    const reply = response?.message?.content;
-
-    if (typeof reply !== "string" || !reply.trim()) {
-        throw createHttpError(502, "The model returned an invalid response.");
-    }
+    const reply = process.env.AI_API_KEY
+        ? await getReplyFromHostedApi(conversation.messages)
+        : await getReplyFromOllama(conversation.messages);
 
     conversation.messages.push({
         role: "assistant",

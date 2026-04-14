@@ -1,12 +1,12 @@
 # Emory
 
-Emory is a full-stack AI chat application with a React frontend and an Express/MongoDB backend that talks to a local Ollama model.
+Emory is a full-stack AI chat application with a React frontend and an Express/MongoDB backend that can use a hosted AI model API (recommended for deployment) or local Ollama.
 
 ## Tech Stack
 
 - Frontend: React, Vite, React Router, Axios, Lucide icons, react-syntax-highlighter
 - Backend: Node.js, Express, Mongoose, CORS, dotenv
-- AI runtime: Ollama (local)
+- AI runtime: Hosted OpenAI-compatible API (deployment) or Ollama (local)
 - Database: MongoDB
 
 ## Project Structure
@@ -44,8 +44,9 @@ Install and run these before starting the app:
 
 1. Node.js 18+ (recommended)
 2. MongoDB (local or hosted)
-3. Ollama running locally at `http://127.0.0.1:11434`
-4. An Ollama model pulled locally (example: `llama3`)
+3. One of the following AI runtimes:
+  - Hosted OpenAI-compatible API key (recommended for Render/Vercel)
+  - Ollama running locally at `http://127.0.0.1:11434`
 
 ## Environment Variables
 
@@ -56,8 +57,21 @@ Create `backend/.env` with:
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
-MODEL=llama3
+MODEL=your_model_name
+
+# Recommended for deployed backend (Render, etc.)
+AI_API_KEY=your_hosted_ai_api_key
+# Optional, defaults to OpenRouter OpenAI-compatible endpoint
+AI_API_URL=https://openrouter.ai/api/v1/chat/completions
+
+# Optional for local Ollama development (used when AI_API_KEY is not set)
+OLLAMA_HOST=http://127.0.0.1:11434
 ```
+
+Notes:
+
+- If `AI_API_KEY` is set, backend uses hosted AI API.
+- If `AI_API_KEY` is not set, backend falls back to Ollama.
 
 ### Frontend (`frontend/.env`, optional)
 
@@ -187,9 +201,9 @@ npm run build
 
 Check:
 
-1. Ollama is running
-2. Model from `MODEL` env var is installed locally
-3. Backend can reach `http://127.0.0.1:11434`
+1. `MODEL` is set correctly
+2. For hosted mode: `AI_API_KEY` is set and valid
+3. For Ollama mode: Ollama is running and backend can reach `OLLAMA_HOST`
 
 ## Scripts Summary
 
