@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield, Sparkles, MessagesSquare, Code2 } from "lucide-react";
+import { ArrowRight, Shield, Sparkles, MessagesSquare, Code2, Download } from "lucide-react";
 
 function LandingPage() {
   return (
@@ -23,6 +23,12 @@ function LandingPage() {
           <Link className="secondaryButton" to="/login">
             Login
           </Link>
+          <a className="secondaryButton setupButton" href="/setup-local.ps1" download>
+            <Download size={16} /> Try it locally (Windows)
+          </a>
+          <a className="secondaryButton setupButton" href="/setup-local.sh" download>
+            <Download size={16} /> Try it locally (macOS/Linux)
+          </a>
         </div>
 
         <div className="heroStats">

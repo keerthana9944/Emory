@@ -113,6 +113,15 @@
     border-color: rgba(23, 65, 85, 0.16);
   }
 
+  .setupButton {
+    background: rgba(230, 245, 248, 0.92);
+    border-color: rgba(17, 76, 95, 0.25);
+  }
+
+  .setupButton:hover {
+    background: rgba(214, 239, 244, 0.96);
+  }
+
   .heroStats {
     margin-top: 28px;
     display: grid;

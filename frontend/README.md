@@ -21,10 +21,10 @@ It is fully connected to backend routes:
 Create a `.env` file in `frontend` if you want a custom API base URL.
 
 ```env
-VITE_API_BASE_URL=https://emory-1nu0.onrender.com/api/chat
+VITE_API_BASE_URL=http://localhost:5000/api/chat
 ```
 
-If `.env` is not provided, the app defaults to `https://emory-1nu0.onrender.com/api/chat`.
+If `.env` is not provided, the app defaults to `http://localhost:5000/api/chat`.
 
 ## Run
 
