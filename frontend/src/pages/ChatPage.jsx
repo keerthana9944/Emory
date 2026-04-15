@@ -24,9 +24,11 @@ import { getSession, logoutUser } from "../lib/auth";
 
 const DEV_API_BASE_URL = "http://localhost:5000/api/chat";
 const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
-const API_BASE_URL = envApiBaseUrl || (import.meta.env.DEV ? DEV_API_BASE_URL : "/api/chat");
+const API_BASE_URL = envApiBaseUrl || (import.meta.env.DEV ? DEV_API_BASE_URL : "");
 const CODE_FENCE_REGEX = /```([\w-]*)\n([\s\S]*?)```/g;
 const RECENT_CUTOFF_MS = 24 * 60 * 60 * 1000;
+const PRODUCTION_API_HINT =
+  "API is not configured for production. Set VITE_API_BASE_URL to your deployed backend /api/chat URL.";
 
 const getErrorMessage = (error, fallback) => {
   if (axios.isAxiosError(error)) {
@@ -46,6 +48,8 @@ const getErrorMessage = (error, fallback) => {
 
   return fallback;
 };
+
+const isApiConfigured = () => Boolean(API_BASE_URL);
 
 const CodeSnippet = ({ code, language, onCopy, snippetId, copiedSnippetId }) => {
   const isCopied = copiedSnippetId === snippetId;
@@ -251,6 +255,11 @@ function ChatPage() {
 
   useEffect(() => {
     const loadConversations = async () => {
+      if (!isApiConfigured()) {
+        setErrorText(PRODUCTION_API_HINT);
+        return;
+      }
+
       setIsFetchingConversations(true);
       try {
         const { data } = await axios.get(API_BASE_URL);
@@ -289,6 +298,10 @@ function ChatPage() {
   };
 
   const refreshConversations = async () => {
+    if (!isApiConfigured()) {
+      return;
+    }
+
     try {
       const { data } = await axios.get(API_BASE_URL);
       setConversations(Array.isArray(data) ? data : []);
@@ -300,6 +313,11 @@ function ChatPage() {
 
   const openConversation = async (id) => {
     if (!id || isFetchingConversation || isLoading) return;
+
+    if (!isApiConfigured()) {
+      setErrorText(PRODUCTION_API_HINT);
+      return;
+    }
 
     setErrorText("");
     setIsFetchingConversation(true);
@@ -323,6 +341,11 @@ function ChatPage() {
   const deleteConversation = async (id) => {
     if (!id || isLoading || isFetchingConversation) return;
 
+    if (!isApiConfigured()) {
+      setErrorText(PRODUCTION_API_HINT);
+      return;
+    }
+
     const shouldDelete = window.confirm("Delete this conversation? This cannot be undone.");
     if (!shouldDelete) return;
 
@@ -344,6 +367,12 @@ function ChatPage() {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!isApiConfigured()) {
+      setErrorText(PRODUCTION_API_HINT);
+      setMessages((prev) => [...prev, { role: "assistant", content: PRODUCTION_API_HINT }]);
+      return;
+    }
 
     const trimmedInput = input.trim();
     setErrorText("");
