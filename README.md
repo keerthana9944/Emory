@@ -60,15 +60,19 @@ MODEL=your_model_name
 OLLAMA_HOST=http://127.0.0.1:11434
 ```
 
-### Frontend (`frontend/.env`, optional)
+### Frontend (`frontend/.env`)
 
-Only needed if you want to override the default API URL:
+Use this in local development, and set the same key in Render Static Site environment variables for production:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api/chat
 ```
 
-If omitted, frontend already defaults to `http://localhost:5000/api/chat`.
+In production, `VITE_API_BASE_URL` is required and should point to your deployed backend endpoint, for example:
+
+```env
+VITE_API_BASE_URL=https://your-backend-name.onrender.com/api/chat
+```
 
 ## Install Dependencies
 
@@ -124,6 +128,36 @@ The backend has no separate build step (it runs directly with Node). Use:
 cd backend
 npm start
 ```
+
+## Deploy On Render
+
+Deploy as two Render services:
+
+1. **Backend Web Service**
+2. **Frontend Static Site**
+
+### Backend Web Service settings
+
+- Root directory: `backend`
+- Build command: `npm install`
+- Start command: `npm start`
+- Environment variables:
+  - `PORT=10000` (or leave default from Render)
+  - `MONGO_URI=...`
+  - `MODEL=...`
+  - `OLLAMA_HOST=...`
+
+### Frontend Static Site settings
+
+- Root directory: `frontend`
+- Build command: `npm install && npm run build`
+- Publish directory: `dist`
+- Environment variables:
+  - `VITE_API_BASE_URL=https://<your-backend-service>.onrender.com/api/chat`
+
+### Important note about Ollama
+
+This backend calls an Ollama host. If you deploy backend on Render, `OLLAMA_HOST` must be reachable from Render. A localhost Ollama process (`127.0.0.1`) on your laptop is not reachable from Render.
 
 ## API Endpoints
 

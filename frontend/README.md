@@ -18,13 +18,17 @@ It is fully connected to backend routes:
 
 ## Environment
 
-Create a `.env` file in `frontend` if you want a custom API base URL.
+Create a `.env` file in `frontend` for local development:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api/chat
 ```
 
-If `.env` is not provided, the app defaults to `http://localhost:5000/api/chat`.
+For production (Render Static Site), set `VITE_API_BASE_URL` in Render environment variables to your deployed backend endpoint:
+
+```env
+VITE_API_BASE_URL=https://your-backend-name.onrender.com/api/chat
+```
 
 ## Run
 

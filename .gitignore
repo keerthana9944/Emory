@@ -1,0 +1,11 @@
+backend/node_modules/
+backend/.env
+frontend/node_modules/
+frontend/.env
+frontend/dist/
+
+# OS/editor artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
