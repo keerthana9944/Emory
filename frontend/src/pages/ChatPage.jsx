@@ -22,9 +22,30 @@ import {
 } from "lucide-react";
 import { getSession, logoutUser } from "../lib/auth";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/chat";
+const DEV_API_BASE_URL = "http://localhost:5000/api/chat";
+const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const API_BASE_URL = envApiBaseUrl || (import.meta.env.DEV ? DEV_API_BASE_URL : "/api/chat");
 const CODE_FENCE_REGEX = /```([\w-]*)\n([\s\S]*?)```/g;
 const RECENT_CUTOFF_MS = 24 * 60 * 60 * 1000;
+
+const getErrorMessage = (error, fallback) => {
+  if (axios.isAxiosError(error)) {
+    const responseMessage = error.response?.data?.message;
+    if (typeof responseMessage === "string" && responseMessage.trim()) {
+      return responseMessage;
+    }
+
+    if (error.code === "ERR_NETWORK") {
+      return "Could not reach the API server. Check VITE_API_BASE_URL and backend deployment.";
+    }
+
+    if (typeof error.response?.status === "number") {
+      return `Request failed with status ${error.response.status}.`;
+    }
+  }
+
+  return fallback;
+};
 
 const CodeSnippet = ({ code, language, onCopy, snippetId, copiedSnippetId }) => {
   const isCopied = copiedSnippetId === snippetId;
@@ -234,8 +255,8 @@ function ChatPage() {
       try {
         const { data } = await axios.get(API_BASE_URL);
         setConversations(Array.isArray(data) ? data : []);
-      } catch {
-        setErrorText("Could not load conversation history. You can still start a new chat.");
+      } catch (error) {
+        setErrorText(getErrorMessage(error, "Could not load conversation history. You can still start a new chat."));
       } finally {
         setIsFetchingConversations(false);
       }
@@ -271,8 +292,9 @@ function ChatPage() {
     try {
       const { data } = await axios.get(API_BASE_URL);
       setConversations(Array.isArray(data) ? data : []);
-    } catch {
+    } catch (error) {
       // non-blocking
+      console.error("Failed to refresh conversations", error);
     }
   };
 
@@ -291,8 +313,8 @@ function ChatPage() {
       setConversationId(data?._id || id);
       setMessages(loadedMessages);
       setIsSidebarOpen(false);
-    } catch {
-      setErrorText("Could not open that conversation. Please try another one.");
+    } catch (error) {
+      setErrorText(getErrorMessage(error, "Could not open that conversation. Please try another one."));
     } finally {
       setIsFetchingConversation(false);
     }
@@ -315,8 +337,8 @@ function ChatPage() {
       }
 
       await refreshConversations();
-    } catch {
-      setErrorText("Could not delete this conversation. Please try again.");
+    } catch (error) {
+      setErrorText(getErrorMessage(error, "Could not delete this conversation. Please try again."));
     }
   };
 
@@ -342,12 +364,16 @@ function ChatPage() {
       }
 
       refreshConversations();
-    } catch {
+    } catch (error) {
+      const errorMessage = getErrorMessage(
+        error,
+        "Message send failed. Confirm backend, database, and Ollama are running.",
+      );
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Connection error. Please verify backend and try again." },
+        { role: "assistant", content: errorMessage },
       ]);
-      setErrorText("Message send failed. Confirm backend, database, and Ollama are running.");
+      setErrorText(errorMessage);
     } finally {
       setIsLoading(false);
     }
