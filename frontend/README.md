@@ -2,6 +2,9 @@
 
 This app is the client for your Emory AI assistant project.
 
+For local development, point it at your local backend.
+For the Render public demo, point it at the deployed backend URL.
+
 It is fully connected to backend routes:
 
 - `POST /api/chat` to send user messages and receive model replies.

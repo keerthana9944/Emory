@@ -396,7 +396,7 @@ function ChatPage() {
     } catch (error) {
       const errorMessage = getErrorMessage(
         error,
-        "Message send failed. Confirm backend, database, and Ollama are running.",
+        "Message send failed. Confirm the backend, database, and AI provider are running.",
       );
       setMessages((prev) => [
         ...prev,

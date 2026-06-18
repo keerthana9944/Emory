@@ -1,12 +1,12 @@
 # Emory
 
-Emory is a full-stack AI chat application with a React frontend and an Express/MongoDB backend that talks to a local Ollama model.
+Emory is a full-stack AI chat application with a React frontend and an Express/MongoDB backend that uses an OpenAI-compatible hosted API.
 
 ## Tech Stack
 
 - Frontend: React, Vite, React Router, Axios, Lucide icons, react-syntax-highlighter
 - Backend: Node.js, Express, Mongoose, CORS, dotenv
-- AI runtime: Ollama (local)
+- AI runtime: OpenAI-compatible hosted API
 - Database: MongoDB
 
 ## Project Structure
@@ -44,8 +44,7 @@ Install and run these before starting the app:
 
 1. Node.js 18+ (recommended)
 2. MongoDB (local or hosted)
-3. Ollama running locally at `http://127.0.0.1:11434`
-4. An Ollama model pulled locally (example: `llama3`)
+3. An OpenAI API key with access to the selected model
 
 ## Environment Variables
 
@@ -56,8 +55,10 @@ Create `backend/.env` with:
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
-MODEL=your_model_name
-OLLAMA_HOST=http://127.0.0.1:11434
+AI_PROVIDER=openai-compatible
+AI_API_KEY=your_openai_api_key
+AI_BASE_URL=https://api.openai.com/v1
+MODEL=gpt-4o-mini
 ```
 
 ### Frontend (`frontend/.env`)
@@ -136,7 +137,7 @@ Deploy as two Render services:
 1. **Backend Web Service**
 2. **Frontend Static Site**
 
-### Backend Web Service settings
+### Backend Web Service settings for Render public demo
 
 - Root directory: `backend`
 - Build command: `npm install`
@@ -144,8 +145,10 @@ Deploy as two Render services:
 - Environment variables:
   - `PORT=10000` (or leave default from Render)
   - `MONGO_URI=...`
-  - `MODEL=...`
-  - `OLLAMA_HOST=...`
+  - `AI_PROVIDER=openai-compatible`
+  - `AI_API_KEY=...`
+  - `AI_BASE_URL=https://api.openai.com/v1`
+  - `MODEL=gpt-4o-mini`
 
 ### Frontend Static Site settings
 
@@ -155,9 +158,9 @@ Deploy as two Render services:
 - Environment variables:
   - `VITE_API_BASE_URL=https://<your-backend-service>.onrender.com/api/chat`
 
-### Important note about Ollama
+### Important note about deployment
 
-This backend calls an Ollama host. If you deploy backend on Render, `OLLAMA_HOST` must be reachable from Render. A localhost Ollama process (`127.0.0.1`) on your laptop is not reachable from Render.
+For the deployed app, use the hosted provider settings above.
 
 ## API Endpoints
 
@@ -188,7 +191,7 @@ Base URL: `http://localhost:5000/api/chat`
 ## Important Notes
 
 - Login/signup currently uses localStorage on frontend (not backend auth/JWT).
-- The backend requires a valid `MODEL` in `.env` and a running Ollama service.
+- The backend requires a valid `MODEL` and a valid hosted AI provider configuration.
 - Conversation documents store message arrays with `user` and `assistant` roles.
 
 ## Troubleshooting
@@ -222,9 +225,9 @@ npm run build
 
 Check:
 
-1. Ollama is running
-2. Model from `MODEL` env var is installed locally
-3. Backend can reach `OLLAMA_HOST`
+1. OpenAI API key is valid
+2. Model from `MODEL` env var is available to your API provider
+3. Backend can reach `AI_BASE_URL`
 
 ## Scripts Summary
 

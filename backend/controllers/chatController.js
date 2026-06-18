@@ -1,5 +1,4 @@
 const Conversation = require("../models/Conversation");
-const { Ollama } = require("ollama");
 const mongoose = require("mongoose");
 
 const createHttpError = (statusCode, message) => {
@@ -8,36 +7,70 @@ const createHttpError = (statusCode, message) => {
     return error;
 };
 
-const ollama = new Ollama({
-    host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434"
-});
-
 const getModelName = () => process.env.MODEL;
+
+const getAIProvider = () => {
+    const apiKeyPresent = Boolean(process.env.AI_API_KEY?.trim());
+    const configuredProvider = process.env.AI_PROVIDER?.trim().toLowerCase();
+
+    if (configuredProvider && configuredProvider !== "openai" && configuredProvider !== "openai-compatible") {
+        throw createHttpError(500, `Unsupported AI_PROVIDER value: ${configuredProvider}. This project now only supports the OpenAI-compatible provider.`);
+    }
+
+    if (!apiKeyPresent) {
+        throw createHttpError(500, "AI_API_KEY environment variable is missing.");
+    }
+
+    return "openai-compatible";
+};
+
+const getOpenAIBaseUrl = () => (process.env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
 
 const normalizeMessages = (messages) => messages.map((message) => ({
     role: message.role,
     content: message.content
 }));
 
-const getReplyFromOllama = async (messages) => {
+const getReplyFromOpenAICompatible = async (messages) => {
     const model = getModelName();
 
     if (!model) {
         throw createHttpError(500, "MODEL environment variable is missing.");
     }
 
-    let response;
+    const apiKey = process.env.AI_API_KEY;
 
-    try {
-        response = await ollama.chat({
-            model,
-            messages: normalizeMessages(messages)
-        });
-    } catch {
-        throw createHttpError(502, "Failed to connect to Ollama. Ensure Ollama is running.");
+    if (!apiKey) {
+        throw createHttpError(500, "AI_API_KEY environment variable is missing.");
     }
 
-    const reply = response?.message?.content;
+    const response = await fetch(`${getOpenAIBaseUrl()}/chat/completions`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model,
+            messages: normalizeMessages(messages)
+        })
+    });
+
+    if (!response.ok) {
+        let responseBody = "";
+
+        try {
+            responseBody = await response.text();
+        } catch {
+            responseBody = "";
+        }
+
+        const message = responseBody.trim() || response.statusText || "Unknown AI provider error.";
+        throw createHttpError(response.status, `AI provider request failed: ${message}`);
+    }
+
+    const data = await response.json();
+    const reply = data?.choices?.[0]?.message?.content;
 
     if (typeof reply !== "string" || !reply.trim()) {
         throw createHttpError(502, "The model returned an invalid response.");
@@ -46,9 +79,21 @@ const getReplyFromOllama = async (messages) => {
     return reply;
 };
 
+const getReplyFromAIProvider = async (messages) => {
+    getAIProvider();
+
+    return getReplyFromOpenAICompatible(messages);
+};
+
 exports.sendMessage = async (req, res) => {
     const { message, conversationId } = req.body;
 
+    // Runtime diagnostics: log provider selection and model without revealing secrets.
+    try {
+        console.log(`AI runtime -> provider=${getAIProvider()}, model=${getModelName()}, hasApiKey=${Boolean(process.env.AI_API_KEY?.trim())}`);
+    } catch (e) {
+        console.log("AI runtime -> provider detection failed", e?.message || e);
+    }
     if (typeof message !== "string" || !message.trim()) {
         throw createHttpError(400, "A non-empty message is required.");
     }
@@ -80,7 +125,7 @@ exports.sendMessage = async (req, res) => {
         content: message.trim()
     });
 
-    const reply = await getReplyFromOllama(conversation.messages);
+    const reply = await getReplyFromAIProvider(conversation.messages);
 
     conversation.messages.push({
         role: "assistant",

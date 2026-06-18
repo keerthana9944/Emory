@@ -26,11 +26,9 @@ if [[ ! -d "$BACKEND_PATH" || ! -d "$FRONTEND_PATH" ]]; then
   fi
 fi
 
-if ! command -v ollama >/dev/null 2>&1; then
-  echo "Ollama is not installed or not in PATH."
-  echo "Install from: https://ollama.com/download"
-  exit 1
-fi
+echo "Checking backend prerequisites..."
+echo "This project now uses an OpenAI-compatible hosted API for the backend."
+echo "Make sure your backend env has AI_PROVIDER, AI_API_KEY, AI_BASE_URL, and MODEL set."
 
 echo "Installing backend dependencies..."
 cd "$BACKEND_PATH"

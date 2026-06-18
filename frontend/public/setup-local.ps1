@@ -24,14 +24,9 @@ if (!(Test-Path $backendPath) -or !(Test-Path $frontendPath)) {
   }
 }
 
-Write-Host "Checking Ollama..." -ForegroundColor Yellow
-try {
-  ollama --version | Out-Null
-} catch {
-  Write-Host "Ollama is not installed or not in PATH." -ForegroundColor Red
-  Write-Host "Install from: https://ollama.com/download/windows" -ForegroundColor Yellow
-  exit 1
-}
+Write-Host "Checking backend prerequisites..." -ForegroundColor Yellow
+Write-Host "This project now uses an OpenAI-compatible hosted API for the backend." -ForegroundColor Cyan
+Write-Host "Make sure your backend env has AI_PROVIDER, AI_API_KEY, AI_BASE_URL, and MODEL set." -ForegroundColor Cyan
 
 Write-Host "Installing backend dependencies..." -ForegroundColor Yellow
 Push-Location $backendPath
